@@ -1,11 +1,11 @@
 let allCameras = [];
 const scanConfig = {
-    fps: 24,
-    // qrbox removed — the library's default box indicator is replaced
-    // by our custom .scan-frame CSS overlay (white corners + red laser).
-    // Scanning still works on the full camera frame.
+    fps: 15, // Smooth decoding
+    aspectRatio: 1.0, // Compatible aspect ratio
     formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
     disableFlip: false
+    // Removed qrbox to eliminate the library's default box. 
+    // We only use our custom CSS frame (laser + corners).
 };
 
 // ── Permanently suppress html5-qrcode's injected UI ──────────
@@ -60,11 +60,14 @@ function startScanner() {
     // Start the MutationObserver NOW — before any camera/DOM injection happens
     startLibrarySuppressor();
 
-    navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => {
-            stream.getTracks().forEach(track => track.stop());
-            return navigator.mediaDevices.enumerateDevices();
-        })
+    navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: { exact: "environment" } } 
+    })
+    .catch(() => navigator.mediaDevices.getUserMedia({ video: true })) // Fallback if exact fail
+    .then(stream => {
+        stream.getTracks().forEach(track => track.stop());
+        return navigator.mediaDevices.enumerateDevices();
+    })
         .then(devices => {
             const videoDevices = devices.filter(device => device.kind === 'videoinput');
 
@@ -231,17 +234,23 @@ function onScanSuccess(decodedText) {
         saveData();
         renderTable(true);
         updateStats();
+        // Lock on with Green corners & status
+        const overlay = document.querySelector('.scanner-overlay');
+        if (overlay) overlay.classList.add('success');
         playBeep('success');
         setStatus('ok', `Checked in ✓`);
-        if (scannerActive && scanner) {
-            scanner.pause(true);
-            scannerActive = false;
-            document.getElementById('toggle-btn').textContent = 'Resume';
-            hideLibPauseOverlay();
-        }
-        showScanModal(true, guest, decodedText, tNo);
-        // Mobile: switch to log tab so user sees the new entry
-        if (typeof autoSwitchToLog === 'function') autoSwitchToLog();
+
+        // Give the user a brief moment (300ms) to see the Green "Snap"
+        setTimeout(() => {
+            if (scannerActive && scanner) {
+                scanner.pause(true);
+                scannerActive = false;
+                document.getElementById('toggle-btn').textContent = 'Resume';
+                hideLibPauseOverlay();
+            }
+            showScanModal(true, guest, decodedText, tNo);
+            if (typeof autoSwitchToLog === 'function') autoSwitchToLog();
+        }, 350);
 
     } else {
         // ── Unknown QR: show walk-in form ──
@@ -299,6 +308,11 @@ function closeScanModal() {
             scannerActive = true;
             document.getElementById('toggle-btn').textContent = 'Pause';
             setStatus('idle', 'Ready — waiting for QR code…');
+            
+            // Turn the scanner frame back to NORMAL (White/Red)
+            const overlay = document.querySelector('.scanner-overlay');
+            if (overlay) overlay.classList.remove('success');
+
             // Mobile: switch back to scanner tab
             if (typeof switchTab === 'function' && window.innerWidth <= 991) switchTab('scanner');
         } catch (e) { }
@@ -358,6 +372,10 @@ function closeDuplicateModal() {
             scannerActive = true;
             document.getElementById('toggle-btn').textContent = 'Pause';
             setStatus('idle', 'Ready — waiting for QR code…');
+            
+            // Turn the scanner frame back to NORMAL
+            const overlay = document.querySelector('.scanner-overlay');
+            if (overlay) overlay.classList.remove('success');
         } catch (e) { }
     }
 }

@@ -42,6 +42,7 @@ async function loadData() {
         guests = rawGuests ? JSON.parse(rawGuests) : [];
         renderTable(false);
         renderGuestTable();
+        updateDeptFilter();
     } catch (e) { console.error("Local load failed", e); }
 
     // 2. Try to Sync with Server
@@ -60,6 +61,7 @@ async function loadData() {
         localStorage.setItem(GUEST_KEY, JSON.stringify(guests));
 
         setDbStatus(true);
+        updateDeptFilter();
         // Process any pending offline scans
         await processSyncQueue();
 
@@ -106,7 +108,7 @@ async function processSyncQueue() {
     if (queue.length === 0) return;
 
     console.log(`🔄 Syncing ${queue.length} offline records...`);
-    
+
     for (const record of queue) {
         try {
             await apiFetch('/api/registrations', {

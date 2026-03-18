@@ -121,7 +121,7 @@
     .mobile-tab-bar {
         display: flex;
         position: sticky;
-        top: 52px; /* just below the top-bar height */
+        top: 42px; /* just below the tightened top-bar */
         z-index: 40;
         background: rgba(8, 8, 18, 0.94);
         backdrop-filter: blur(16px);

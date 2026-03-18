@@ -52,9 +52,9 @@
 }
 
 /* Kill ALL library-injected overlays: div, canvas, img */
-#qr-reader__scan_region > div,
-#qr-reader__scan_region > canvas,
-#qr-reader__scan_region > img {
+#qr-reader__scan_region>div,
+#qr-reader__scan_region>canvas,
+#qr-reader__scan_region>img {
     display: none !important;
 }
 
@@ -98,7 +98,8 @@
 @media (min-width: 992px) {
     .scanner-view-wrap {
         aspect-ratio: 1 / 1;
-        max-height: 420px;
+        height: 380px; /* Shorter to account for the camera select below */
+        max-height: none;
     }
 }
 
@@ -134,24 +135,39 @@
     left: 0;
     top: 0;
     width: 100%;
-    height: 2px; /* Thinner line for more precision look */
-    background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(255, 40, 40, 0.1) 5%,
-        rgba(255, 40, 40, 0.8) 45%,
-        #ff3a3a 50%,
-        rgba(255, 40, 40, 0.8) 55%,
-        rgba(255, 40, 40, 0.1) 95%,
-        transparent 100%
-    );
-    box-shadow: 
+    height: 2px;
+    /* Thinner line for more precision look */
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(255, 40, 40, 0.1) 5%,
+            rgba(255, 40, 40, 0.8) 45%,
+            #ff3a3a 50%,
+            rgba(255, 40, 40, 0.8) 55%,
+            rgba(255, 40, 40, 0.1) 95%,
+            transparent 100%);
+    box-shadow:
         0 0 8px 1px rgba(255, 40, 40, 0.6),
         0 0 16px 2px rgba(255, 40, 40, 0.3);
     z-index: 2;
     pointer-events: none;
     /* Longer duration + smoother timing function */
     animation: laserScanSmooth 2.8s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Success state: Green laser */
+.scanner-overlay.success .scanner-laser {
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(13, 251, 156, 0.1) 5%,
+            rgba(13, 251, 156, 0.8) 45%,
+            #0dfb9c 50%,
+            rgba(13, 251, 156, 0.8) 55%,
+            rgba(13, 251, 156, 0.1) 95%,
+            transparent 100%);
+    box-shadow: 
+        0 0 10px 1px rgba(13, 251, 156, 0.7),
+        0 0 18px 2px rgba(13, 251, 156, 0.4);
 }
 
 /* Elegant trailing glow under the beam */
@@ -162,13 +178,19 @@
     right: 0;
     top: 0;
     height: 35px;
-    background: linear-gradient(
-        180deg,
-        rgba(255, 40, 40, 0.12) 0%,
-        rgba(255, 40, 40, 0.04) 50%,
-        transparent 100%
-    );
+    background: linear-gradient(180deg,
+            rgba(255, 40, 40, 0.12) 0%,
+            rgba(255, 40, 40, 0.04) 50%,
+            transparent 100%);
     pointer-events: none;
+    transition: background 0.3s ease;
+}
+
+.scanner-overlay.success .scanner-laser::after {
+    background: linear-gradient(180deg,
+            rgba(13, 251, 156, 0.15) 0%,
+            rgba(13, 251, 156, 0.05) 50%,
+            transparent 100%);
 }
 
 @keyframes laserScanSmooth {
@@ -176,12 +198,15 @@
         top: -2%;
         opacity: 0;
     }
+
     10% {
         opacity: 1;
     }
+
     90% {
         opacity: 1;
     }
+
     100% {
         top: 102%;
         opacity: 0;
@@ -200,8 +225,9 @@
     /* Auto-size: square, responsive.
        clamp(min, preferred, max) — shrinks on small phones,
        caps at a sensible max on large viewfinders. */
-    width:  clamp(160px, 68%, 280px);
-    aspect-ratio: 1 / 1;   /* always a perfect square */
+    width: clamp(160px, 68%, 280px);
+    aspect-ratio: 1 / 1;
+    /* always a perfect square */
     z-index: 7;
     pointer-events: none;
     /* Clip laser so it cannot bleed outside the white frame */
@@ -228,7 +254,21 @@
     background: #ffffff;
     border-radius: 2px;
     box-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
+    transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
+
+/* Success state: Green corners that "lock on" by moving inward */
+.scanner-overlay.success .scan-corner::before,
+.scanner-overlay.success .scan-corner::after {
+    background: #0dfb9c;
+    box-shadow: 0 0 14px rgba(13, 251, 156, 0.9);
+}
+
+/* Tighten corners: each corner glides towards center */
+.scanner-overlay.success .scan-corner.tl { transform: translate(6px, 6px); }
+.scanner-overlay.success .scan-corner.tr { transform: translate(-6px, 6px) scaleX(-1); }
+.scanner-overlay.success .scan-corner.bl { transform: translate(6px, -6px) scaleY(-1); }
+.scanner-overlay.success .scan-corner.br { transform: translate(-6px, -6px) scale(-1); }
 
 /* Horizontal arm */
 .scan-corner::before {
@@ -247,14 +287,39 @@
 }
 
 /* Corner positions — relative to .scan-frame */
-.scan-corner.tl { top: 0;    left: 0; }
-.scan-corner.tr { top: 0;    right: 0; transform: scaleX(-1); }
-.scan-corner.bl { bottom: 0; left: 0;  transform: scaleY(-1); }
-.scan-corner.br { bottom: 0; right: 0; transform: scale(-1); }
+.scan-corner.tl {
+    top: 0;
+    left: 0;
+}
+
+.scan-corner.tr {
+    top: 0;
+    right: 0;
+    transform: scaleX(-1);
+}
+
+.scan-corner.bl {
+    bottom: 0;
+    left: 0;
+    transform: scaleY(-1);
+}
+
+.scan-corner.br {
+    bottom: 0;
+    right: 0;
+    transform: scale(-1);
+}
 
 @keyframes cornerPulse {
-    0%, 100% { opacity: 0.7; }
-    50%       { opacity: 1;   }
+
+    0%,
+    100% {
+        opacity: 0.7;
+    }
+
+    50% {
+        opacity: 1;
+    }
 }
 
 /* ══════════════════════════════════════════════════
@@ -283,7 +348,7 @@
     border: 1.5px solid rgba(255, 255, 255, 0.12);
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
     transition: background 0.3s ease, border-color 0.3s ease,
-                color 0.3s ease, box-shadow 0.3s ease;
+        color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .scanner-status.ok {
@@ -329,8 +394,15 @@
 }
 
 @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.3; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
 }
 
 /* ─── Camera selector ──────────────────────────── */
@@ -394,7 +466,7 @@
     align-items: center;
     justify-content: center;
     transition: background 0.2s, border-color 0.2s, color 0.2s,
-                box-shadow 0.2s, transform 0.15s;
+        box-shadow 0.2s, transform 0.15s;
     padding: 0;
 }
 
@@ -412,12 +484,24 @@
     transform: translateY(-1px);
 }
 
-.cam-refresh-btn:active  { transform: scale(0.92); }
-.cam-refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.cam-refresh-btn:active {
+    transform: scale(0.92);
+}
+
+.cam-refresh-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
 
 @keyframes cam-spin {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .cam-refresh-btn.spinning svg {

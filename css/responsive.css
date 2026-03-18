@@ -259,6 +259,8 @@
     .form-control {
         font-size: 0.8rem;
         padding: 8px 10px;
+        color: #fff !important;
+        background-color: var(--surface2);
     }
 
     /* Flex-between in modals */

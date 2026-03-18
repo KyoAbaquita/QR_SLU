@@ -8,7 +8,7 @@
 
 /* Inner content area, below sticky header on mobile */
 .main-content {
-    padding: 14px 14px 0;
+    padding: 8px 14px 0;
 }
 
 @media (min-width: 600px) {

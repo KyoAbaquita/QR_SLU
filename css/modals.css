@@ -136,8 +136,8 @@
 #confirm-modal,
 #walkin-modal,
 #table-tracker-modal {
-    align-items: center;
-    padding: 16px;
+    align-items: flex-start; /* Move up from center */
+    padding: 12vh 16px 16px; /* 12% from top instead of perfectly centered */
 }
 
 #scan-modal .modal,
@@ -729,6 +729,12 @@
     height: auto;
     overflow-y: auto;
     overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+#guest-modal .tbl-wrap::-webkit-scrollbar {
+    display: none;
 }
 
 /* Ellipsis on all non-action columns */

@@ -15,7 +15,7 @@ if (typeof fetch === 'undefined') {
 }
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
 // ── MySQL Connection Pool ────────────────────────────────────
 // This works for BOTH Localhost and Cloud (Aiven/Railway)
@@ -147,7 +147,7 @@ app.post('/api/send-email', async (req, res) => {
     const { toEmail, toName, toJob, toDept, qrData } = req.body;
 
     // ⚠️ PASTE YOUR NEW BREVO KEY HERE ⚠️
-    const BREVO_API_KEY = process.env.BREVO_API_KEY || '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';
+    const BREVO_API_KEY = process.env.BREVO_API_KEY || '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';
     const SENDER_EMAIL = 'pitogojohncarlo50@gmail.com';
     const SENDER_NAME = 'SLU J&T Event Registration';
 

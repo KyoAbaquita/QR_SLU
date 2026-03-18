@@ -175,26 +175,41 @@
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: 8px;
-    color: var(--text);
+    color: var(--text) !important;
     padding: 10px 14px;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter' !important;
     font-size: 0.9rem;
     outline: none;
     transition: all .2s ease;
     width: 100%;
     backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
-.form-control:focus,
-.form-control:hover {
+.form-control:focus {
     border-color: var(--accent);
-    background: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.2);
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.2);
+}
+
+.form-control:hover {
+    border-color: rgba(100, 110, 255, 0.4);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* ─── Webkit Autofill fix (prevent white/yellow background) ─── */
+.form-control:-webkit-autofill,
+.form-control:-webkit-autofill:hover, 
+.form-control:-webkit-autofill:focus {
+    -webkit-text-fill-color: #ffffff !important;
+    -webkit-box-shadow: 0 0 0px 1000px #1e1e2d inset !important;
+    transition: background-color 5000s ease-in-out 0s;
 }
 
 .form-control::placeholder {
     color: var(--muted);
-    opacity: 0.8;
+    opacity: 0.7;
 }
 
 select.form-control {
